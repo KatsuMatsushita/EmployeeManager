@@ -219,6 +219,8 @@ function addItem (addItem){
                             empRow.value = element.id;
                             return empRow;
                         });
+                        // this is if the new employee will have no manager
+                        empList.push({name: "None", value: null});
                         return role.getTitle(db);
                     })
                     .then (([roleReturn, fields]) => {
@@ -260,10 +262,8 @@ function addItem (addItem){
 
                         // these steps prepare the answers object to be an array for the addEmp function
                         let newEmployee = Object.values(answers);
-
                         // the newEmployee array has items in the order: role_id, manager_id, first_name, last_name
                         employee.addEmp(db, [newEmployee]);
-                        console.log("the add Employee worked!");
                     })
                     .then( () => {
                         console.log(`The database has been updated with a new ${addItem}, ${newName}`);
