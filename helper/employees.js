@@ -22,11 +22,17 @@ function addEmp (connection, newEmpName) {
 };
 
 function upEmp (connection, empID) {
-    return connection.promise().query("UPDATE");
+    // this returns an UPDATE query, taking in empID which is an array with 2 values, the employee ID and the new role
+    return connection.promise().query("UPDATE employee SET role_id = ? WHERE id = ?", empID);
+}
+
+function getEmpRole (connection, empID) {
+    // this returns just the role_id of the employee
+    return connection.promise().query("SELECT role_id FROM employee WHERE employee.id = ?", empID);
 }
 
 function delEmp (connection, delEmpID) {
     return connection.promise().query("DELETE FROM employee WHERE id=?", delEmpID);
 }
 
-module.exports = {getAll, getName, getJoin, addEmp, upEmp, delEmp};
+module.exports = {getAll, getName, getJoin, addEmp, upEmp, getEmpRole, delEmp};

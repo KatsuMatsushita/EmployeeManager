@@ -106,6 +106,7 @@ function init() {
                 break;
             case "Update an Employee":
                 // call the query to update an employee
+                updateItem("employee");
                 break;
             case "Delete a Department":
                 // call a function to delete a department
@@ -277,6 +278,68 @@ function addItem (addItem){
 }
 
 // this function updates an employee or role
+function updateItem(updItem) {
+    if (updItem == "employee"){
+        let empList, updatedEmployee;
+        employee.getName(db)
+            .then( ([rows, fields]) => {
+            // the following creates an array of objects with 2 key-value pairs
+            // the key-values are name and value, where the name is first_name + last_name and the value is the employee id
+                empList = rows.map((element) => {
+                    let empRow = {};
+                    empRow.name = element.first_name + " " + element.last_name;
+                    empRow.value = element.id;
+                    return empRow;
+                });
+                const question1 = [
+                    {
+                        name: "updateEmployee",
+                        message: "Please choose the employee to update: ",
+                        type: "list",
+                        choices: empList
+                    }
+                ];
+                return inquirer.prompt(question1);
+            })
+            .then( (answer) => {
+                // the answer contains the employee id, as inquirer.js uses the name to display an option, but uses value to store the answer
+                updatedEmployee = empList.find( element => element.value == answer.updateEmployee);
+                return role.getTitle(db);
+            })
+            .then( ([queryRes, fields]) => {
+                // now that the roleList is populated, we can create a question2 that will ask the user what the new role should be
+                const roleList = queryRes.map( (element) => {
+                    let roleRow = {};
+                    roleRow.name = element.title;
+                    roleRow.value = element.id;
+                    return roleRow;
+                });
+                const question2 = [
+                    {
+                        name: "newRole",
+                        message: "Which role do you want to assign to the selected employee: ",
+                        type: "list",
+                        choices: roleList
+                    }
+                ];
+                return inquirer.prompt(question2);
+            })
+            .then( (answer2) => {
+                // newRole is an array to be passed into the employee.upEmp function and should be new role_id and employee.id
+                let newRole = [];
+                newRole[0] = answer2.newRole;
+                newRole[1] = updatedEmployee.value;
+
+                employee.upEmp(db, newRole);
+                console.log(`${updatedEmployee.name} has been updated in the database.`);
+            })
+            .then( () => {
+                init();
+            });
+    } else {
+
+    };
+}
 
 // this function will be for deletion
 function delItem (delItem) {
@@ -312,7 +375,7 @@ function delItem (delItem) {
                 const questions = [
                 {
                     name: "delRoleName",
-                    message: `Please choose the role to delete:`,
+                    message: `Please choose the role to deleted:`,
                     type: "list",
                     choices: roleList
                 }];
