@@ -87,7 +87,7 @@ function init() {
                 break;
             case "View All Employees":
                 // call the query to view all employees
-                employee.getAll(db).then( ([rows, fields]) => {
+                employee.getJoin(db).then( ([rows, fields]) => {
                     console.log("\n");
                     console.table(rows);
                 }).then( () => {init();} );
