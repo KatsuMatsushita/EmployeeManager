@@ -54,7 +54,7 @@ const mainMenuOptions = [
         name: "mainChoice",
         message: "Please choose what you wish to do:",
         type: "list",
-        choices: ["View All Departments", "View All Roles", "View All Employees", "Add a Department", "Add a Role", "Add an Employee", "Update an Employee", "Delete a Department", "Delete a Role", "Delete an Employee", "Quit"]
+        choices: ["View All Departments", "View All Roles", "View All Employees", "Add a Department", "Add a Role", "Add an Employee", "Update an Employee's Role", "Update an Employee's Manager", "Delete a Department", "Delete a Role", "Delete an Employee", "Quit"]
     }
 ];
 
@@ -104,9 +104,12 @@ function init() {
                 // call the query to add an employee
                 addItem("employee");
                 break;
-            case "Update an Employee":
+            case "Update an Employee's Role":
                 // call the query to update an employee
-                updateItem("employee");
+                updateItem("role");
+                break;
+            case "Update an Employee's Manager":
+                updateItem("manager");
                 break;
             case "Delete a Department":
                 // call a function to delete a department
@@ -277,9 +280,9 @@ function addItem (addItem){
         });
 }
 
-// this function updates an employee or role
+// this function updates an employee's role or their manager'
 function updateItem(updItem) {
-    if (updItem == "employee"){
+    if (updItem == "role"){
         let empList, updatedEmployee;
         employee.getName(db)
             .then( ([rows, fields]) => {
@@ -337,7 +340,54 @@ function updateItem(updItem) {
                 init();
             });
     } else {
-
+        let empList, updatedEmployee;
+        employee.getName(db)
+            .then( ([rows, fields]) => {
+            // the following creates an array of objects with 2 key-value pairs
+            // the key-values are name and value, where the name is first_name + last_name and the value is the employee id
+                empList = rows.map((element) => {
+                    let empRow = {};
+                    empRow.name = element.first_name + " " + element.last_name;
+                    empRow.value = {id: element.id, manager: element.manager_id};
+                    return empRow;
+                });
+                
+                const question1 = [
+                    {
+                        name: "updateEmployee",
+                        message: "Please choose the employee to update: ",
+                        type: "list",
+                        choices: empList
+                    }
+                ];
+                return inquirer.prompt(question1);
+            })
+            .then( (answer) => {
+                // the answer contains the employee id, as inquirer.js uses the name to display an option, but uses value to store the answer
+                updatedEmployee = empList.find( element => element.value.id == answer.updateEmployee.id);
+                // this will remove the updatedEmployee from the empList, which we want to reuse as the list of potential managers
+                empList = empList.filter(updatingEmployee => updatingEmployee.name != updatedEmployee.name);
+                const question2 = [
+                    {
+                        name: "newManager",
+                        message: "Please select the new Manager to assign to the selected employee: ",
+                        type: "list",
+                        choices: empList
+                    }
+                ];
+                return inquirer.prompt(question2);
+            })
+            .then( (answer2) => {
+                // newRole is an array to be passed into the employee.updateManager function and should be new manager_id and employee.id
+                let newManager = [];
+                newManager[0] = answer2.newManager.id;
+                newManager[1] = updatedEmployee.value.id;
+                employee.updateManager(db, newManager);
+                console.log(`${updatedEmployee.name} has been updated in the database.`);
+            })
+            .then( () => {
+                init();
+            });
     };
 }
 

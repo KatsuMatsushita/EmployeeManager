@@ -19,12 +19,8 @@ function addRole (connection, newRole) {
     return connection.promise().query("INSERT INTO role (salary, department_id, title) VALUES ?", [newRole]);
 };
 
-function upRole (connection, roleName) {
-    return connection.promise().query("UPDATE");
-}
-
 function delRole (connection, delRoleName) {
     return connection.promise().query("DELETE FROM role WHERE title = ?", delRoleName);
 }
 
-module.exports = {getAll, getTitle, getJoin, addRole, upRole, delRole};
+module.exports = {getAll, getTitle, getJoin, addRole, delRole};

@@ -7,7 +7,7 @@ function getAll (connection) {
 
 function getName (connection) {
     // this returns names and id as a promise
-    return connection.promise().query("SELECT id,first_name,last_name FROM employee");
+    return connection.promise().query("SELECT id,first_name,last_name,manager_id FROM employee");
 };
 
 function getJoin (connection) {
@@ -35,4 +35,9 @@ function delEmp (connection, delEmpID) {
     return connection.promise().query("DELETE FROM employee WHERE id=?", delEmpID);
 }
 
-module.exports = {getAll, getName, getJoin, addEmp, upEmp, getEmpRole, delEmp};
+function updateManager (connection, empID) {
+    // this returns an UPDATE query, taking in empID which is an array with 2 values, the employee ID and the new role
+    return connection.promise().query("UPDATE employee SET manager_id = ? WHERE id = ?", empID);
+}
+
+module.exports = {getAll, getName, getJoin, addEmp, upEmp, getEmpRole, delEmp, updateManager};
