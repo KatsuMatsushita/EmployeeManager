@@ -10,6 +10,11 @@ function getName (connection) {
     return connection.promise().query("SELECT id,first_name,last_name FROM employee");
 };
 
+function getJoin (connection) {
+    // this returns a joined table with the department table
+    return connection.promise().query("SELECT employee.id AS ID, employee.first_name AS first_name, employee.last_name AS last_name, role.title AS title, department.name AS Department, role.salary AS Salary, employee.manager_id AS manager FROM department JOIN role ON role.department_id = department.id JOIN employee ON role.id = employee.role_id")
+}
+
 function addEmp (connection, newEmpName) {
     return connection.promise().query("INSERT INTO employee (role_id, manager_id, first_name, last_name) VALUES ?", [newEmpName]);
 };
@@ -22,4 +27,4 @@ function delEmp (connection, delEmpID) {
     return connection.promise().query("DELETE FROM employee WHERE id=?", delEmpID);
 }
 
-module.exports = {getAll, getName, addEmp, upEmp, delEmp};
+module.exports = {getAll, getName, getJoin, addEmp, upEmp, delEmp};
