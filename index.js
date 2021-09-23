@@ -54,13 +54,13 @@ const mainMenuOptions = [
         name: "mainChoice",
         message: "Please choose what you wish to do:",
         type: "list",
-        choices: ["View All Departments", "View All Roles", "View All Employees", "Add a Department", "Add a Role", "Add an Employee", "Update an Employee", "Delete a Department", "Delete a Role", "Quit"]
+        choices: ["View All Departments", "View All Roles", "View All Employees", "Add a Department", "Add a Role", "Add an Employee", "Update an Employee", "Delete a Department", "Delete a Role", "Delete an Employee", "Quit"]
     }
 ];
 
 // init function that will start off the entire app
 function init() {
-    console.log("MAIN MENU");
+    console.log("\n"+"MAIN MENU");
     // inquirer prompt for the main menu
     inquirer.prompt(mainMenuOptions)
     .then( (answer) => {
@@ -115,6 +115,10 @@ function init() {
                 // call a function to delete a role
                 delItem("role");
                 break;
+            case "Delete an Employee":
+                // call a function to delete an employee
+                delItem("employee");
+                break;
             case "Quit":
                 // quit out of the app
                 console.log("Goodbye!");
@@ -133,6 +137,11 @@ function getFull(tableEl){
                     console.table(`${tableEl} Listing`, result);
                 }).then( () => init());
 }
+
+/* 
+Using chained .then and promises inspired by the following article:
+https://codeburst.io/node-js-mysql-and-promises-4c3be599909b
+*/
 
 // This function will be for adding a department
 function addItem (addItem){
@@ -179,10 +188,13 @@ function addItem (addItem){
                         inquirer.prompt(questions)
                         .then( (answers) => {
                             answers.title = newName;
+                            // this finds the row inside of rows where there is a match between the name and the answers.department_id
                             const deptID = rows.find( element => element.name == answers.department_id);
+                            // this extracts the id from the row above, and assigns it to answers.department_id, so it can be used in the query
                             answers.department_id = deptID.id;
+                            // the values function turns the answers object into an array, as mysql queries need arrays
                             let tester = Object.values(answers);
-                            role.addRole(db, tester)
+                            role.addRole(db, [tester])
                             .then ( () => {
                                 console.log(`The database has been updated with a new ${addItem}, ${newName}`);
                                 init();
@@ -191,7 +203,72 @@ function addItem (addItem){
                     });
                     break;
                 case "employee":
-                    console.log("This is where the employee would have been added");
+                    let empList, roleList, questions, fullName;
+                    fullName = newName.split(" ");
+                    employee.getName(db)
+                    .then( ([rows, fields]) => {
+                        // the following creates an array of objects with 2 key-value pairs
+                        // the key-values are name and value, where the name is first_name + last_name and the value is the employee id
+                        empList = rows.map((element) => {
+                            let empRow = {};
+                            empRow.name = element.first_name + " " + element.last_name;
+                            empRow.value = element.id;
+                            return empRow;
+                        });
+                        return role.getTitle(db);
+                    })
+                    .then (([roleReturn, fields]) => {
+                        // the following creates an array of objects with 2 key-value pairs
+                        // the key-values are name and value, where the name is role title and the value is the role id
+                        roleList = roleReturn.map( (element) => {
+                            let roleRow = {};
+                            roleRow.name = element.title;
+                            roleRow.value = element.id;
+                            return roleRow;
+                        });
+                        questions = [
+                            {
+                                name: "role_id",
+                                message: "Please choose the role of the employee: ",
+                                type: "list",
+                                choices: roleList
+                            },
+                            {
+                                name: "manager_id",
+                                message: "Please choose the employee's manager: ",
+                                type: "list",
+                                choices: empList
+                            }
+                        ];
+                    })
+                    .then ( () => {
+                        // this should return the inquirer promise
+                        return inquirer.prompt(questions)
+                    })
+                    .then ( (answers) => {
+                        //do something with answers
+                        
+                        // this puts the employee's name back together as key-values in the answers object
+                        let firstName = fullName[0];
+                        let lastName = fullName[1];
+                        answers.first_name = firstName;
+                        answers.last_name = lastName;
+
+                        // these steps prepare the answers object to be an array for the addEmp function
+                        let newEmployee = Object.values(answers);
+
+                        // the newEmployee array has items in the order: role_id, manager_id, first_name, last_name
+                        employee.addEmp(db, [newEmployee]);
+                        console.log("the add Employee worked!");
+                    })
+                    .then( () => {
+                        console.log(`The database has been updated with a new ${addItem}, ${newName}`);
+                        init();
+                    })
+                    .catch( err => {
+                        console.log(err);
+                        process.exit();
+                    });
                     break;
                 default:
                     console.log("An error has occurred within the switch statement of function addItem");
@@ -203,6 +280,7 @@ function addItem (addItem){
 
 // this function will be for deletion
 function delItem (delItem) {
+    // this massive switch-case statement determines which code block to run, depending on the delItem
     switch (delItem) {
         case "department":
             department.getAll(db).then( ([rows, fields]) => {
@@ -216,6 +294,7 @@ function delItem (delItem) {
             inquirer.prompt(questions)
                 .then ( (answer) => {
                     department.delDept(db, answer.delDeptID);
+                    console.log(`${answer.delDeptID} has been removed from the database.`);
                 })
                 .then ( () => {
                     init();
@@ -240,12 +319,44 @@ function delItem (delItem) {
             inquirer.prompt(questions)
                 .then ( (answer) => {
                     role.delRole(db, answer.delRoleName);
+                    console.log(`${answer.delRoleName} has been removed from the database.`);
                 })
                 .then ( () => {
                     init();
                 });
             });
         break;
+        case "employee":
+            let empList;
+            employee.getName(db)
+                .then( ([rows, fields]) => {
+                // the following creates an array of objects with 2 key-value pairs
+                // the key-values are name and value, where the name is first_name + last_name and the value is the employee id
+                    empList = rows.map((element) => {
+                        let empRow = {};
+                        empRow.name = element.first_name + " " + element.last_name;
+                        empRow.value = element.id;
+                        return empRow;
+                    });
+                    const questions = [
+                        {
+                            name: "delEmployee",
+                            message: "Please choose the employee to delete: ",
+                            type: "list",
+                            choices: empList
+                        }
+                    ];
+                    return inquirer.prompt(questions);
+                })
+                .then( (answer) => {
+                    // the answer contains the employee id, as inquirer.js uses the name to display an option, but uses value to store the answer
+                    employee.delEmp(db, answer.delEmployee);
+                    const deletedEmployee = empList.find( element => element.value == answer.delEmployee);
+                    console.log(`${deletedEmployee.name} has been removed from the database.`);
+                })
+                .then( () => {
+                    init();
+                });
         default:
             console.log("Something other than department was to be deleted");
     };

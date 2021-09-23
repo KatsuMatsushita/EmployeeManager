@@ -7,11 +7,11 @@ function getAll (connection) {
 
 function getTitle (connection) {
     // this returns just the titles as a promise
-    return connection.promise().query("SELECT title FROM role");
+    return connection.promise().query("SELECT id,title FROM role");
 };
 
 function addRole (connection, newRole) {
-    return connection.promise().query("INSERT INTO role (salary, department_id, title) VALUES (?, ?, ?)", newRole);
+    return connection.promise().query("INSERT INTO role (salary, department_id, title) VALUES ?", [newRole]);
 };
 
 function upRole (connection, roleName) {

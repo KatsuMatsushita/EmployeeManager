@@ -5,16 +5,21 @@ function getAll (connection) {
      return connection.promise().query("SELECT * FROM employee");
 };
 
-function addEmp (connection, newEmpName) {
-    return connection.promise().query("INSERT INTO employee (name) VALUES (?)", newDeptName);
+function getName (connection) {
+    // this returns names and id as a promise
+    return connection.promise().query("SELECT id,first_name,last_name FROM employee");
 };
 
-function upEmp (connection, empName) {
+function addEmp (connection, newEmpName) {
+    return connection.promise().query("INSERT INTO employee (role_id, manager_id, first_name, last_name) VALUES ?", [newEmpName]);
+};
+
+function upEmp (connection, empID) {
     return connection.promise().query("UPDATE");
 }
 
-function delEmp (connection, delDeptID) {
-    return connection.promise().query("DELETE FROM department WHERE id=(?)", delDeptID);
+function delEmp (connection, delEmpID) {
+    return connection.promise().query("DELETE FROM employee WHERE id=?", delEmpID);
 }
 
-module.exports = {getAll, addEmp, upEmp, delEmp};
+module.exports = {getAll, getName, addEmp, upEmp, delEmp};
