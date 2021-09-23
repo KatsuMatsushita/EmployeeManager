@@ -37,7 +37,7 @@ The application uses JavaScript, Node.js, and MySQL.
 9. ![Quit](https://user-images.githubusercontent.com/85419207/134498718-d5052dc4-6415-4eb8-aafe-7c481ee35198.jpg)
 
 ## Usage Video <a name="video"></a>
-https://drive.google.com/file/d/1IAn2aZlCU3AYMlmkemQjY2S3aU8FWq0h/view
+https://drive.google.com/file/d/1E_5ivWsY8eRMeO7xsk0GmYQz2WaL4UkY/view?usp=sharing
 
 ## Contribution Guidelines <a name="contribution"></a>
 1. Clone the Main branch of the repository from GitHub
