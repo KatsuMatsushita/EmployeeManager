@@ -80,7 +80,7 @@ function init() {
                 break;
             case "View All Roles":
                 // call the query to view all roles
-                role.getAll(db).then( ([rows, fields]) => {
+                role.getJoin(db).then( ([rows, fields]) => {
                     console.log("\n");
                     console.table(rows);
                 }).then( () => {init();} );
@@ -126,7 +126,7 @@ function init() {
             default:
                 console.log("An error has occurred; no recognized Main Menu option was chosen")
         };
-    });//.then( () => init());
+    });
 };
 
 // This function will take in a parameter and use it to create a SQL query to get all entries from a table
