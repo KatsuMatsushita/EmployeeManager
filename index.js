@@ -54,7 +54,7 @@ const mainMenuOptions = [
         name: "mainChoice",
         message: "Please choose what you wish to do:",
         type: "list",
-        choices: ["View All Departments", "View All Roles", "View All Employees", "Add a Department", "Add a Role", "Add an Employee", "Update an Employee's Role", "Update an Employee's Manager", "Delete a Department", "Delete a Role", "Delete an Employee", "Quit"]
+        choices: ["View All Departments", "View All Roles", "View All Employees", "Add a Department", "Add a Role", "Add an Employee", "Update an Employee's Role", "Update an Employee's Manager", "Delete a Department", "Delete a Role", "Delete an Employee", "View Department Budgets", "Quit"]
     }
 ];
 
@@ -122,6 +122,13 @@ function init() {
             case "Delete an Employee":
                 // call a function to delete an employee
                 delItem("employee");
+                break;
+            case "View Department Budgets":
+                // call a function that will display all of the department budgets
+                department.sumDept(db).then( ([rows, fields]) => {
+                    console.log("\n");
+                    console.table(rows);
+                }).then( () => {init();} );
                 break;
             case "Quit":
                 // quit out of the app

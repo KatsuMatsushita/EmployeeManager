@@ -15,4 +15,15 @@ function delDept (connection, delDeptID) {
     return connection.promise().query("DELETE FROM department WHERE name = ?", delDeptID);
 }
 
-module.exports = {getAll, addDept, delDept};
+function sumDept (connection) {
+    // using `` makes the mysql query much easier to read; will consider refactoring the othe queries later
+    return connection.promise().query(`SELECT 
+    d.name, SUM(salary) AS total_budget 
+    FROM department d
+    JOIN role r ON d.id = r.department_id
+    JOIN employee e on r.id = e.role_id
+    WHERE d.id
+    GROUP BY d.name`);
+}
+
+module.exports = {getAll, addDept, delDept, sumDept};
